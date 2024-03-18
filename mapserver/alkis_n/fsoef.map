@@ -1,0 +1,401 @@
+MAP 
+# Flurstücke im öffentlichen Eigentum - Muster
+# 2022-03-01 Neuer Layer "Anlieger"
+# Views:
+#$ psql -d alkis0*gkz* -f /data/projekte/postnas/oeff_FS_Land_Bund.sql 
+#$ psql -d alkis0*gkz* -f /data/projekte/postnas/oeff_FS_*gkz*.sql 
+	NAME "fsoef*gkz*"
+	STATUS ON
+	EXTENT ...
+	PROJECTION "init=epsg:25832" END
+	MAXSIZE 8400
+	FONTSET "/opt/gdi/alkisn/fonts/arial.fnt"
+	UNITS METERS
+	WEB
+		METADATA
+			wms_title "Flurstücke öffentlich"
+			wms_abstract "Flurstücke aus ALKIS im öffentlichen Besitz: Stadt ____, Kreis ____, Land, Bund, andere Stellen"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_bbox_extended "true"
+			wms_encoding "UTF-8"
+			wms_onlineresource "https://ows-test.krz.de/cgi-bin/mapserv7?map=/opt/gdi/alkisn/fsoef*gkz*.map"
+			wms_feature_info_mime_type "text/html"
+			wms_keywordlist "GKZ*gkz*,ALKIS,Flurstück,Stadt,Gemeinde,Kreis,Land,Bund"
+			wms_fees "none"
+			wms_accessconstraints "für den Dienstgebrauch"
+			wms_enable_request '* !GetMetadata'
+			include "meta600.map"
+		END
+	END
+	LEGEND
+		STATUS ON
+		KEYSIZE 32 16
+		KEYSPACING 5 5
+		TRANSPARENT ON
+		LABEL
+			TYPE TRUETYPE
+			FONT 'arial'
+			SIZE 9
+			COLOR 1 1 1
+		END
+	END
+
+	# Stadt rotbraun
+	LAYER
+		NAME "oeff_flurst_se"
+		GROUP stadt
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-Adr] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from oeff_flurst*gkz*se using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_group_title "Stadt"
+			wms_group_abstract "Flächen von Flurstücken an denen eine Stadt oder Gemeinde ein Eigentum oder ein Recht hat. Für Details bitte die Auskunft auf dem Kartendienst ALKIS verwenden."
+			wms_title "Stadt Eigentum"
+			wms_abstract "Flächen mit Eigentum der Stadt am Flurstück."
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 40000
+		SYMBOLSCALEDENOM 1000
+		CLASS
+			NAME "Eigentum"
+			STYLE
+				COLOR 230 70 0 OPACITY 22
+			END
+			STYLE
+				OFFSET -1 -99 # innen
+				OUTLINECOLOR 230 70 0 OPACITY 50
+				WIDTH 1.4 MINWIDTH 1.0 MAXWIDTH 2.6
+			END
+		END
+	END
+	LAYER
+		NAME "oeff_flurst_sr"
+		GROUP stadt
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-Adr] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from oeff_flurst*gkz*sr using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Stadt Recht"
+			wms_abstract "Flächen mit Recht der Stadt am Flurstück."
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 40000
+		SYMBOLSCALEDENOM 1000
+		CLASS
+			NAME "Recht an .."
+			STYLE
+				COLOR 230 70 0 OPACITY 12
+			END
+			STYLE
+				OUTLINECOLOR 230 70 0
+				OFFSET -2 -99 # innen
+				WIDTH 2.0 MINWIDTH 1.4 MAXWIDTH 4.0
+				PATTERN 3 4 END LINECAP butt
+			END
+		END
+	END
+
+	# Kreis blau
+	LAYER
+		NAME "oeff_flurst_ke"
+		GROUP kreis
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-Adr] dbname='alkis0*gkz*' user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from oeff_flurst*gkz*ke using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Kreis Eigentum"
+			wms_abstract "Flächen mit Eigentum des Kreises am Flurstück."
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 40000
+		SYMBOLSCALEDENOM 1000
+		CLASS
+			NAME "Eigentum"
+			STYLE
+				COLOR 90 0 210 OPACITY 22
+			END
+			STYLE
+				OFFSET -1 -99
+				OUTLINECOLOR 90 0 210 OPACITY 50
+				WIDTH 1.4 MINWIDTH 1.0 MAXWIDTH 2.6
+			END
+		END
+	END
+	LAYER
+		NAME "oeff_flurst_kr"
+		GROUP kreis
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-Adr] dbname='alkis0*gkz*' user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from oeff_flurst*gkz*kr using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_group_title "Kreis"
+			wms_group_abstract "Flächen von Flurstücken an denen der Landkreis ein Eigentum oder ein Recht hat. Für Details bitte die Auskunft auf dem Kartendienst ALKIS verwenden."
+			wms_title "Kreis Recht"
+			wms_abstract "Flächen mit Recht des Kreises am Flurstück."
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 40000
+		SYMBOLSCALEDENOM 1000
+		CLASS
+			NAME "Recht an .."
+			STYLE
+				COLOR 90 0 210 OPACITY 12
+			END
+			STYLE
+				OUTLINECOLOR 90 0 210
+				OFFSET -2 -99
+				WIDTH 2.0 MINWIDTH 1.4 MAXWIDTH 4.0
+				PATTERN 3 4 END LINECAP butt
+			END
+		END
+	END
+
+	# Land grün
+	LAYER
+		NAME "oeff_flurst_le"
+		GROUP land
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-Adr] dbname='alkis0*gkz*' user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from oeff_flurst_le using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_group_title "Land"
+			wms_group_abstract "Flächen von Flurstücken an denen das Land Nordrhein-Westfalen oder eine seiner Behörden ein Eigentum oder ein Recht hat. Für Details bitte die Auskunft auf dem Kartendienst ALKIS verwenden."
+			wms_title "Land Eigentum"
+			wms_abstract "Flächen mit Eigentum des Landes am Flurstück."
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 40000
+		SYMBOLSCALEDENOM 1000
+		CLASS
+			NAME "Eigentum"
+			STYLE
+				COLOR 60 250 0 OPACITY 22
+			END
+			STYLE
+				OFFSET -1 -99
+				OUTLINECOLOR 60 250 0 OPACITY 50
+				WIDTH 1.4 MINWIDTH 1.0 MAXWIDTH 2.6
+			END
+		END
+	END
+	LAYER
+		NAME "oeff_flurst_lr"
+		GROUP land
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-Adr] dbname='alkis0*gkz*' user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from oeff_flurst_lr using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Land Recht"
+			wms_abstract "Flächen mit Recht des Landes am Flurstück."
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 40000
+		SYMBOLSCALEDENOM 1000
+		CLASS
+			NAME "Recht an .."
+			STYLE
+				COLOR 60 250 0 OPACITY 12
+			END
+			STYLE
+				OUTLINECOLOR 60 250 0
+				OFFSET -2 -99
+				WIDTH 2.0 MINWIDTH 1.4 MAXWIDTH 4.0
+				PATTERN 3 4 END LINECAP butt
+			END
+		END
+	END
+
+	# Bund gelb
+	LAYER
+		NAME "oeff_flurst_be"
+		GROUP bund
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-Adr] dbname='alkis0*gkz*' user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from oeff_flurst_be using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_group_title "Bund"
+			wms_group_abstract "Flächen von Flurstücken an denen die Bundesrepublik Deutschland oder eine seiner Behörden ein Eigentum oder ein Recht hat. Für Details bitte die Auskunft auf dem Kartendienst ALKIS verwenden."
+			wms_title "Bund Eigentum"
+			wms_abstract "Flächen mit Eigentum des Bundes am Flurstück."
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 40000
+		SYMBOLSCALEDENOM 1000
+		CLASS
+			NAME "Eigentum"
+			STYLE
+				COLOR 240 210 5 OPACITY 22
+			END
+			STYLE
+				OFFSET -1 -99
+				OUTLINECOLOR 240 210 5 OPACITY 50
+				WIDTH 1.4 MINWIDTH 1.0 MAXWIDTH 2.6
+			END
+		END
+	END
+	LAYER
+		NAME "oeff_flurst_br"
+		GROUP bund
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-Adr] dbname='alkis0*gkz*' user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from oeff_flurst_br using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Bund Recht"
+			wms_abstract "Flächen mit Recht des Bundes am Flurstück."
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 40000
+		SYMBOLSCALEDENOM 1000
+		CLASS
+			NAME "Recht an .."
+			STYLE
+				COLOR 240 210 5 OPACITY 12
+			END
+			STYLE
+				OUTLINECOLOR 240 210 5
+				OFFSET -2 -99
+				WIDTH 2.0 MINWIDTH 1.4 MAXWIDTH 4.0
+				PATTERN 3 4 END LINECAP butt
+			END
+		END
+	END
+
+	# Andere (Stadtwerke, Wasserverband, ..) - violett
+	LAYER
+		NAME "oeff_flurst_ae"
+		GROUP andere
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-Adr] dbname='alkis0*gkz*' user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from oeff_flurst*gkz*ae using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_group_title "Andere"
+			wms_group_abstract "Flächen von Flurstücken an denen eine öffentliche Einrichtung ein Eigentum oder ein Recht hat, die nicht zu den anderen Ebenen gehört. Das kann ein Landes- oder Landschaftsverband sein, ein Wasserverband oder Stadtwerke. Auch benachbarte Städte oder Gemeinden werden hier angezeigt. Für Details bitte die Auskunft auf dem Kartendienst ALKIS verwenden. Diese Gruppe ist schwer abzugrenzen."
+			wms_title "Andere Eigentum"
+			wms_abstract "Flächen mit Eigentum anderer öffentlicher Stellen am Flurstück."
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 40000
+		SYMBOLSCALEDENOM 1000
+		CLASS
+			NAME "Eigentum"
+			STYLE
+				COLOR 250 10 200 OPACITY 22
+			END
+			STYLE
+				OFFSET -1 -99
+				OUTLINECOLOR 250 10 200 OPACITY 50
+				WIDTH 1.4 MINWIDTH 1.0 MAXWIDTH 2.6
+			END
+		END
+	END
+	LAYER
+		NAME "oeff_flurst_ar"
+		GROUP andere
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-Adr] dbname='alkis0*gkz*' user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from oeff_flurst*gkz*ar using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Andere Recht"
+			wms_abstract "Flächen mit Recht anderer öffentlicher Stellen am Flurstück."
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 40000
+		SYMBOLSCALEDENOM 1000
+		CLASS
+			NAME "Recht an .."
+			STYLE
+				COLOR 250 10 200 OPACITY 12
+			END
+			STYLE
+				OUTLINECOLOR 250 10 200
+				OFFSET -2 -99
+				WIDTH 2.0 MINWIDTH 1.4 MAXWIDTH 4.0
+				PATTERN 3 4 END LINECAP butt
+			END
+		END
+	END
+
+	# (Die) Anlieger (der Ufergrundstücke)
+	LAYER
+		NAME "oeff_flurst_ne"
+		GROUP anlieger
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-Adr] dbname='alkis0*gkz*' user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from oeff_flurst_ne using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_group_title "Anlieger"
+			wms_group_abstract "Flächen von Flurstücken im Anliegereigentum. Von Buchungspflicht befreit Par. 3 Abs. 2 GBO."
+			wms_title "Anlieger Eigentum"
+			wms_abstract "Flächen (meist Bäche) im Anlieger-Eigentum (Eigentümer der Ufergrundstücke)."
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 40000
+		SYMBOLSCALEDENOM 1000
+		CLASS
+			NAME "Anlieger - Eigentum"
+			STYLE
+				COLOR 0 60 230 OPACITY 22
+			END
+			STYLE
+				OFFSET -1 -99
+				OUTLINECOLOR 0 60 230 OPACITY 50
+				WIDTH 1.4 MINWIDTH 1.0 MAXWIDTH 2.6
+			END
+		END
+	END
+END

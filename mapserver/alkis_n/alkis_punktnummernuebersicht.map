@@ -1,0 +1,558 @@
+# hhttp://localhost/cgi-bin/mapserv?map=/data/umn/postnas_demo/alkis_n/alkis_punktnummernuebersicht.map&mode=browse&layer=genauigkeitsstufe&layer=objektart&template=openlayers
+# http://wms2016.wheregroup.com/cgi-bin/mapserv?map=/data/umn/postnas_demo/alkis_n/alkis_punktnummernuebersicht.map
+
+
+MAP
+	NAME 'wms_alkis_punktuebersicht'
+	STATUS ON
+	SIZE 1000 1000
+
+	RESOLUTION 72
+	MAXSIZE 50000
+
+
+    CONFIG 'MS_ERRORFILE' "/data/umn/log/alkis_punktuebersicht.log"
+    DEBUG 4
+
+	EXTENT 349000 5529000 356000 5533000 #muss angepasst werden
+
+	PROJECTION
+		'init=epsg:25832'
+	END
+
+	SYMBOLSET 'symbols/symbols_alkis.sym'
+	FONTSET 'fonts/fonts.txt'
+
+	IMAGECOLOR 254 254 254
+	UNITS meters
+	IMAGETYPE png
+
+	OUTPUTFORMAT
+		NAME 'png'
+		DRIVER AGG/PNG
+		MIMETYPE 'image/png'
+		IMAGEMODE RGBA
+		EXTENSION 'png'
+		FORMATOPTION 'GAMMA=0.75'
+		FORMATOPTION 'INTERLACE=OFF'
+		TRANSPARENT ON
+	END
+
+	WEB
+		#LOG '/datapublic/umn/log/error.log'
+		IMAGEPATH '/datapublic/umn/images/'
+		IMAGEURL 'http://localhost/umn/images/'
+		METADATA
+			wms_title 'ALKIS Punktnummernübersicht'
+			wms_abstract 'Der WMS-Dienst ALKIS Punktnummernübersicht enthält farblich differenzierte Punktnummern, Symbole für die Genauigkeitsstufe und die Punktart. '
+			wms_accessconstraints 'none'
+			wms_feature_info_mime_type 'text/html'
+			wms_srs 'EPSG:25832 EPSG:31466 EPSG:31467 EPSG:31468 EPSG:31469 EPSG:4326'
+			wms_onlineresource 'http://wms2016.wheregroup.com/cgi-bin/mapserv?map=/data/umn/postnas_demo/alkis_n/alkis_punktnummernuebersicht.map'
+			wms_encoding 'UTF-8'
+
+			ows_schema_location '..'
+			ows_abstract 'ALKIS Punktnummernübersicht'
+			ows_keywordlist 'ALKIS,ALKIS_NW,Punktnummernübersicht,WebGIS,WMS,WFS'
+			ows_fees 'none'
+			ows_accessconstraints 'none'
+
+			ows_enable_request '*'
+
+			#include 'include/contact_address.map'
+			#include 'include/contact_person.map'
+			include "include/meta_contact.map" # ersetzen durch individuelle Datei je Katasteramt
+		END
+	END
+
+	LEGEND
+		STATUS ON
+		KEYSIZE 16 16
+		KEYSPACING 5 5
+		#TEMPLATE '../templates/legendPunktnummer.html'
+		LABEL
+			COLOR 120 120 120
+			TYPE TRUETYPE
+			FONT 'arial'
+			SIZE 9
+		END
+	END
+
+	###################################################
+	# Punktnummernübersicht
+			#11003, 1300X, 31005, 51011, 61009(fehlt noch in Tabelle)
+
+	LAYER
+		NAME 'genauigkeitsstufe'
+		TYPE POINT	
+
+		EXTENT 349000 5529000 356000 5533000
+
+		PROJECTION
+			'init=epsg:25832'
+		END
+
+		CONNECTIONTYPE postgis
+		CONNECTION 'host=localhost dbname=alkis user=postgres port=5432'
+		DATA 'wkb_geometry from (SELECT * FROM alkis.pp_punktnummernuebersicht WHERE (punktkennung IS NOT NULL AND genauigkeitsstufe IS NOT NULL)) as foo using unique gid using SRID=25832'
+
+		METADATA
+			wms_title 'Genauigkeitsstufe'
+			wms_srs 'EPSG:25832 EPSG:31466 EPSG:31467 EPSG:31468 EPSG:31469 EPSG:4326'
+		END
+
+		MINSCALEDENOM 0
+		MAXSCALEDENOM 5000
+		LABELMINSCALEDENOM 0
+		LABELMAXSCALEDENOM 2500
+
+		SYMBOLSCALEDENOM 5000
+
+		LABELITEM 'punktnummer'
+		CLASSITEM 'genauigkeitsstufe'
+
+		CLASS
+			NAME 'GST 2000 und 2100 (S <= 2cm und S <= 3cm)'
+			EXPRESSION /2[0-1]00/
+			STYLE
+				SYMBOL 'point'
+				COLOR 0 0 255 #blau
+				#OUTLINECOLOR 254 254 254
+				SIZE 5
+				MINSIZE 5
+				MAXSIZE 7
+			END
+		END
+
+		CLASS
+			NAME 'GST 2200 und 2300 (S <= 6cm und S <= 10cm)'
+			EXPRESSION /2[2-3]00/
+			STYLE
+				SYMBOL 'point'
+				COLOR 0 125 0 #gelb
+				#OUTLINECOLOR 254 254 254
+				SIZE 5
+				MINSIZE 5
+				MAXSIZE 7
+			END
+		END
+
+		CLASS
+			NAME 'GST 3000 (S <= 30cm)'
+			EXPRESSION /3000/
+			STYLE
+				SYMBOL 'point'
+				COLOR 161 70 255 #violett
+				#OUTLINECOLOR 254 254 254
+				SIZE 5
+				MINSIZE 5
+				MAXSIZE 7
+			END
+		END
+
+	END
+	#-----------------------------------------------------------------------------------
+	LAYER
+		NAME 'digitale_Punkte'
+		TYPE POINT
+		
+
+		EXTENT 349000 5529000 356000 5533000
+
+		PROJECTION
+			'init=epsg:25832'
+		END
+
+		CONNECTIONTYPE postgis
+		CONNECTION 'host=localhost dbname=alkis user=postgres port=5432'
+		DATA 'wkb_geometry from (SELECT * FROM alkis.pp_punktnummernuebersicht WHERE (punktkennung IS NULL)) as foo using unique gid using SRID=25832'
+
+		METADATA
+			wms_title 'Digitale Punkte (ohne Punktnummer)'
+			wms_srs 'EPSG:25832 EPSG:31466 EPSG:31467 EPSG:31468 EPSG:31469 EPSG:4326'
+		END
+
+		MINSCALEDENOM 0
+		MAXSCALEDENOM 5000
+
+		SYMBOLSCALEDENOM 5000
+
+		CLASS
+			NAME 'Digitale Punkte'
+			#EXPRESSION '(2000 OR 2100)'
+			STYLE
+				SYMBOL 'point'
+				COLOR 255 0 0 #rot
+				#OUTLINECOLOR 254 254 254
+				SIZE 5
+				MINSIZE 5
+				MAXSIZE 7
+			END
+		END
+
+	END
+	#-----------------------------------------------------------------------------------
+	LAYER
+		NAME 'Punkte_ohne_GST'
+		TYPE POINT
+		
+
+		EXTENT 349000 5529000 356000 5533000
+
+		PROJECTION
+			'init=epsg:25832'
+		END
+
+		CONNECTIONTYPE postgis
+		CONNECTION 'host=localhost dbname=alkis user=postgres port=5432'
+		DATA 'wkb_geometry from (SELECT * FROM alkis.pp_punktnummernuebersicht WHERE (punktkennung IS NOT NULL AND genauigkeitsstufe IS NULL)) as foo using unique gid using SRID=25832'
+
+		METADATA
+			wms_title 'Punkte ohne GST'
+			wms_srs 'EPSG:25832 EPSG:31466 EPSG:31467 EPSG:31468 EPSG:31469 EPSG:4326'
+		END
+
+		MINSCALEDENOM 0
+		MAXSCALEDENOM 5000
+		LABELMINSCALEDENOM 0
+		LABELMAXSCALEDENOM 2500
+
+		SYMBOLSCALEDENOM 5000
+
+		LABELITEM 'punktnummer'
+		CLASSITEM 'genauigkeitsstufe'
+
+		CLASS
+			NAME 'Punkte ohne GST'
+			STYLE
+				SYMBOL 'point'
+				COLOR 255 0 255 #magenta
+				#OUTLINECOLOR 254 254 254
+				SIZE 5
+				MINSIZE 5
+				MAXSIZE 7
+			END
+		END
+
+	END
+	#---------------------------------------------------------------
+	LAYER
+		NAME 'objektart'
+		TYPE POINT
+		
+
+		EXTENT 349000 5529000 356000 5533000
+
+		PROJECTION
+			'init=epsg:25832'
+		END
+
+		CONNECTIONTYPE postgis
+		CONNECTION 'host=localhost dbname=alkis user=postgres port=5432 '
+		DATA 'wkb_geometry from (SELECT * FROM alkis.pp_punktnummernuebersicht) as foo using unique gid using SRID=25832'
+
+		METADATA
+			wms_title 'Objektart'
+			wms_srs 'EPSG:25832 EPSG:31466 EPSG:31467 EPSG:31468 EPSG:31469 EPSG:4326'
+		END
+
+		TOLERANCE 5
+		HEADER './templates/header_punktnummer.html'
+		TEMPLATE './templates/punktnummer.html'
+		FOOTER './templates/footer.html'
+
+		MINSCALEDENOM 0
+		MAXSCALEDENOM 5000
+
+		SYMBOLSCALEDENOM 5000
+
+		CLASSITEM 'art'
+
+		CLASS
+			NAME 'Aufnahmepunkt'
+			EXPRESSION 'Aufnahmepunkt'
+			STYLE
+				SYMBOL 'point'
+				COLOR 0 0 255 #60 160 255
+				#OUTLINECOLOR 254 254 254
+				SIZE 2
+				MINSIZE 2
+				MAXSIZE 4
+			END
+		END
+
+		CLASS
+			NAME 'Sicherungspunkt'
+			EXPRESSION 'Sicherungspunkt'
+			STYLE
+				SYMBOL 'point'
+				COLOR 0 0 255 #70 90 250
+				#OUTLINECOLOR 254 254 254
+				SIZE 2
+				MINSIZE 2
+				MAXSIZE 4
+			END
+		END
+
+		CLASS
+			NAME 'Grenzpunkt'
+			EXPRESSION 'Grenzpunkt'
+			STYLE
+				SYMBOL 'point'
+				COLOR 255 128 0 #150 100 230
+				#OUTLINECOLOR 254 254 254
+				SIZE 2
+				MINSIZE 2
+				MAXSIZE 4
+			END
+		END
+
+		CLASS
+			NAME 'Besonderer Bauwerkspunkt'
+			EXPRESSION 'Besonderer Bauwerkspunkt'
+			STYLE
+				SYMBOL 'point'
+				COLOR 255 0 255 #255 255 0
+				#OUTLINECOLOR 254 254 254
+				SIZE 2
+				MINSIZE 2
+				MAXSIZE 4
+			END
+		END
+
+		CLASS
+			NAME 'Besonderer Gebäudepunkt'
+			EXPRESSION 'Besonderer Gebäudepunkt'
+			STYLE
+				SYMBOL 'point'
+				COLOR 255 0 255 #255 255 0
+				#OUTLINECOLOR 254 254 254
+				SIZE 2
+				MINSIZE 2
+				MAXSIZE 4
+			END
+		END
+
+		CLASS
+			NAME 'Besonderer Topographischer Punkt'
+			EXPRESSION 'Besonderer Topographischer Punkt'
+			STYLE
+				SYMBOL 'point'
+				COLOR 255 0 0 #255 0 0
+				#OUTLINECOLOR 254 254 254
+				SIZE 2
+				MINSIZE 2
+				MAXSIZE 4
+			END
+		END
+
+		CLASS
+			NAME 'Sonstiger Vermessungspunkt'
+			EXPRESSION 'Sonstiger Vermessungspunkt'
+			STYLE
+				SYMBOL 'point'
+				COLOR 0 125 0 #255 255 0
+				#OUTLINECOLOR 254 254 254
+				SIZE 2
+				MINSIZE 2
+				MAXSIZE 4
+			END
+		END
+
+	END
+	#--------------------------------------------------------------------------------------------------
+	LAYER
+		NAME 'zustaendige_stelle'
+		TYPE POINT
+		STATUS ON
+		
+
+		EXTENT 349000 5529000 356000 5533000
+
+		PROJECTION
+			'init=epsg:25832'
+		END
+
+		CONNECTIONTYPE postgis
+		CONNECTION 'host=localhost dbname=alkis user=postgres port=5432'
+		DATA 'wkb_geometry from (SELECT * FROM alkis.pp_punktnummernuebersicht WHERE (stelle IS NOT NULL)) as foo using unique gid using SRID=25832'
+
+		METADATA
+			wms_title 'zuständige Stelle'
+			wms_srs 'EPSG:25832 EPSG:31466 EPSG:31467 EPSG:31468 EPSG:31469 EPSG:4326'
+		END
+
+		MINSCALEDENOM 0
+		MAXSCALEDENOM 5000
+		LABELMINSCALEDENOM 0
+		LABELMAXSCALEDENOM 2500
+
+		SYMBOLSCALEDENOM 5000
+
+		CLASSITEM 'stelle'
+
+		CLASS
+			NAME 'Rhein.-Berg. Kreis (GL)'  #Achtung passen Sie die CLASSES nach Ihren Stellen an!
+			TEXT 'GL'
+			EXPRESSION /4450/
+			LABEL
+				TYPE TRUETYPE
+				FONT 'arial'
+				POSITION ur
+				OFFSET 2 2
+				FORCE False
+				COLOR 0 0 0 #schwarz
+				#OUTLINECOLOR 254 254 254
+				SIZE 7
+				MINSIZE 5
+				MAXSIZE 8
+			END
+			STYLE
+				SYMBOL 'point'
+				COLOR 0 0 0 #schwarz
+				#OUTLINECOLOR 0 0 0 #schwarz
+				SIZE 1
+				MINSIZE 1
+				MAXSIZE 1
+			END
+		END
+
+		CLASS
+			NAME 'Stelle'    #Achtung passen Sie die CLASSES nach Ihren Stellen an!
+			TEXT 'Stelle'
+			EXPRESSION /./
+			LABEL
+				TYPE TRUETYPE
+				FONT 'arial'
+				POSITION cc
+				OFFSET 0 1
+				FORCE False
+				COLOR 0 0 0 #schwarz
+				OUTLINECOLOR 254 254 254
+				SIZE 7
+				MINSIZE 5
+				MAXSIZE 8
+			END
+			STYLE
+				SYMBOL 'point'
+				COLOR 0 0 0 #schwarz
+				OUTLINECOLOR 0 0 0 #schwarz
+				SIZE 1.5
+				MINSIZE 1.5
+				MAXSIZE 1.5
+				WIDTH 1
+				MINWIDTH 1
+				MAXWIDTH 1
+			END
+		END
+	END
+
+	#-----------------------------------------------------------------------------------
+	LAYER
+		NAME 'punktnummer'
+		TYPE POINT
+		
+
+		EXTENT 349000 5529000 356000 5533000
+
+		PROJECTION
+			'init=epsg:25832'
+		END
+
+		CONNECTIONTYPE postgis
+		CONNECTION 'host=localhost dbname=alkis user=postgres port=5432 '
+		DATA 'wkb_geometry from (SELECT * FROM alkis.pp_punktnummernuebersicht WHERE (punktkennung IS NOT NULL AND genauigkeitsstufe IS NOT NULL)) as foo using unique gid using SRID=25832'
+
+		METADATA
+			wms_title 'Punktnummer'
+			wms_srs 'EPSG:25832 EPSG:31466 EPSG:31467 EPSG:31468 EPSG:31469 EPSG:4326'
+
+		END
+
+		MINSCALEDENOM 0
+		MAXSCALEDENOM 5000
+		LABELMINSCALEDENOM 0
+		LABELMAXSCALEDENOM 2500
+
+		SYMBOLSCALEDENOM 2500
+
+		LABELITEM 'punktnummer'
+		CLASSITEM 'genauigkeitsstufe'
+
+		CLASS
+			#NAME 'GST 2000 und 2100 (S <= 2cm und S <= 3cm)'
+			EXPRESSION /2[0-1]00/
+			LABEL
+				TYPE TRUETYPE
+				FONT 'arial'
+				POSITION uc
+				OFFSET 0 1
+				FORCE False
+				COLOR 0 0 255 #blau
+				OUTLINECOLOR 254 254 254
+				SIZE 7
+				MINSIZE 5
+				MAXSIZE 8
+			END
+			STYLE
+				SYMBOL 'point'
+				COLOR 0 0 255 #blau
+				OUTLINECOLOR 0 0 255 #blau
+				SIZE 0
+				MINSIZE 0
+				MAXSIZE 0
+			END
+		END
+
+		CLASS
+			#NAME 'GST 2200 und 2300 (S <= 6cm und S <= 10cm)'
+			EXPRESSION /2[2-3]00/
+			LABEL
+				TYPE TRUETYPE
+				FONT 'arial'
+				POSITION uc
+				OFFSET 0 1
+				FORCE False
+				COLOR 0 125 0 #gelb
+				OUTLINECOLOR 254 254 254
+				SIZE 7
+				MINSIZE 5
+				MAXSIZE 8
+			END
+			STYLE
+				SYMBOL 'point'
+				COLOR 0 125 0 #gelb
+				OUTLINECOLOR 0 125 0 #gelb
+				SIZE 0
+				MINSIZE 0
+				MAXSIZE 0
+			END
+		END
+
+		CLASS
+			#NAME 'GST 3000 (S <= 30cm)'
+			EXPRESSION /3000/
+			LABEL
+				TYPE TRUETYPE
+				FONT 'arial'
+				POSITION uc
+				OFFSET 0 1
+				FORCE False
+				COLOR 161 70 255 #violett
+				OUTLINECOLOR 254 254 254
+				SIZE 7
+				MINSIZE 5
+				MAXSIZE 8
+			END
+			STYLE
+				SYMBOL 'point'
+				COLOR 161 70 255 #violett
+				OUTLINECOLOR 161 70 255 #violett
+				SIZE 0
+				MINSIZE 0
+				MAXSIZE 0
+			END
+		END
+	END
+
+END

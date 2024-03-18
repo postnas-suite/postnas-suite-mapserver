@@ -1,0 +1,1110 @@
+MAP
+# ALKIS: "Bauwerke" aus verschiedenen Tabellen anzeigen.
+# Einige dieser Bauwerke werden in der amtlichen Standard-Karte nicht angezeigt, z.B. Durchlässe im Gewässerbereich. 
+# Andere sehen aus wie Gebäude (z.B. Carport aus Sonstige).
+# Mit Maptrimmer eine ausführbare (schlanke) Version diese Mapfiles für jedes GKZ (Mandant) erzeugen.
+# Stand
+#  2021-03-01 Entwurf
+#  2021-03-02 POINT-Layer, Stichworte, Korrekturen
+#  2021-03-15 TEMPLATE für Auskunft "Bauwerk"
+#  2022-02-24 Neue Bauwerks-Typen 10,11,12.
+#             JOIN für Feature-Info in allen Layern. EXTENT auch in Layern.
+#             Für die Kartenanzeige (label) wird mit "coalesce()" vorrangig der Name angezeigt, ersatzweise der Bauwerkstyp.
+#             Für die Feature-Info werden beide Werte an das Template geliefert.
+
+# ToDo: keywords vervollständigen
+
+	NAME "alkis_bauwerke_*gkz*"
+	EXTENT ...
+	PROJECTION "init=epsg:25832" END
+	STATUS ON
+	MAXSIZE 8400
+	FONTSET "/opt/gdi/fonts/arial.fnt"
+	UNITS METERS
+	SYMBOL
+		NAME "pkt"
+		TYPE ellipse FILLED true
+		POINTS 5 5 END
+	END
+	WEB
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 20000
+		METADATA
+			wms_title "ALKIS Bauwerke"
+			wms_abstract "Gesonderter Kartendienst für alle Arten von Bauwerken im ALKIS. Diese werden farblich hervorgehoben und mit ihrem Typ beschriftet. Dies Bauwerke werden teilweise auch in der ALKIS-Standardkarte dargestellt, sind dort aber eher unauffällig (z.B. Brücke) oder können mit Gebäuden verwechselt werden (z.B. Carport)."
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_bbox_extended "true"
+			wms_encoding "UTF-8"
+			wms_onlineresource "https://mein.ows-server.de/cgi-bin/mapserv7?map=/opt/gdi/alkisn/alkis_bauwerke_*gkz*.map"
+			wms_feature_info_mime_type "text/html"
+			wms_keywordlist "GKZ*gkz*,ALKIS,Bauwerk,Brücke,Durchlass,Carport,Turm"
+			wms_fees "none"
+			wms_accessconstraints "für den Dienstgebrauch"
+			wms_enable_request "*"
+			include "meta600.map"
+		END
+	END
+	LEGEND
+		STATUS ON
+		KEYSIZE 32 16
+		KEYSPACING 5 5
+		TRANSPARENT ON
+		LABEL
+			TYPE TRUETYPE
+			FONT 'arial'
+			SIZE 9
+			COLOR 1 1 1
+		END
+	END
+
+	# 1: V e r k e h r
+	LAYER
+		NAME verkehr_f
+		GROUP verkehr
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_bauwerkimverkehrsbereich b LEFT JOIN ax_bauwerksfunktion_bauwerkimverkehrsbereich u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POLYGON') AS vf using SRID=25832 using unique gml_id"
+		METADATA
+			wms_group_title "Verkehr"
+			wms_group_abstract "Bauwerke im Verkehrsbereich"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Verk. Flächen"
+			wms_abstract "Bauwerke im Verkehrsbereich (Flächen)"
+			wms_keywordlist "Brücke,Brückenpfeiler,Tunnel,Unterführung,Landebrücke,Schleusenkammer,Hochbahn,Hochstraße,Durchfahrt"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 1 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_bauwerkimverkehrsbereich b LEFT JOIN ax_bauwerksfunktion_bauwerkimverkehrsbereich u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 4
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Fl. Bauwerk im Verkehrsbereich"
+			STYLE
+				COLOR 40 0 180 OPACITY 14 # Blau
+			END
+			STYLE
+				OUTLINECOLOR 40 0 180
+				WIDTH 3 MINWIDTH 2 MAXWIDTH 5 #FL
+			END
+			LABEL
+				MAXSCALEDENOM 2000
+				TYPE TRUETYPE FONT arial COLOR 40 0 180 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+	LAYER
+		NAME verkehr_l
+		GROUP verkehr
+		TYPE LINE
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_bauwerkimverkehrsbereich b LEFT JOIN ax_bauwerksfunktion_bauwerkimverkehrsbereich u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='LINESTRING') AS vl using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Verk. Linien"
+			wms_abstract "Bauwerke im Verkehrsbereich (Linien)"
+			wms_keywordlist "Widerlager,Steg"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 1 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_bauwerkimverkehrsbereich b LEFT JOIN ax_bauwerksfunktion_bauwerkimverkehrsbereich u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+
+		TOLERANCEUNITS pixels TOLERANCE 10
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Li. Bauwerk im Verkehrsbereich"
+			STYLE
+				COLOR 40 0 180
+				WIDTH 4 MINWIDTH 2 MAXWIDTH 7 #LI
+			END
+			LABEL
+				MAXSCALEDENOM 2000
+				TYPE TRUETYPE FONT arial COLOR 40 0 180 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+
+	# 2: G e w ä s s e r
+	LAYER
+		NAME gewaess_f
+		GROUP gewaess
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_bauwerkimgewaesserbereich b LEFT JOIN ax_bauwerksfunktion_bauwerkimgewaesserbereich u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POLYGON') AS gf using SRID=25832 using unique gml_id"
+		METADATA
+			wms_group_title "Gewässer"
+			wms_group_abstract "Bauwerke im Gewässerbereich"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Gew. Flächen"
+			wms_abstract "Bauwerke im Gewässerbereich (Flächen)"
+			wms_keywordlist "Rohrdurchlass,Wehr,Rückhaltebecken,Durchlass,Fischtreppe,Schöpfwerk,Sicherheitstor,Hafendamm,Mole"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 2 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_bauwerkimgewaesserbereich b LEFT JOIN ax_bauwerksfunktion_bauwerkimgewaesserbereich u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 4
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+		#	EXPRESSION "__"
+			NAME "Fl. Bauwerk im Gewässerbereich"
+			STYLE
+				COLOR 0 160 246 OPACITY 14 # Hellblau
+			END
+			STYLE
+				OUTLINECOLOR 0 160 246
+				WIDTH 3 MINWIDTH 2 MAXWIDTH 5 #FL
+			END
+			LABEL
+				MAXSCALEDENOM 3000
+				TYPE TRUETYPE FONT arial COLOR 0 160 246 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+	LAYER
+		NAME gewaess_l
+		GROUP gewaess
+		TYPE LINE
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_bauwerkimgewaesserbereich b LEFT JOIN ax_bauwerksfunktion_bauwerkimgewaesserbereich u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='LINESTRING') AS gl using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Gew. Linien"
+			wms_abstract "Bauwerke im Gewässerbereich (Linien)"
+			wms_keywordlist "Wehr,Rohrdurchlass,Düker,Ufermauer,Kaimauer,Siel"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 2 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_bauwerkimgewaesserbereich b LEFT JOIN ax_bauwerksfunktion_bauwerkimgewaesserbereich u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 10
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Li. Bauwerk im Gewässerbereich"
+			STYLE
+				COLOR 0 160 246
+				WIDTH 4 MINWIDTH 2 MAXWIDTH 7 #LI
+			END
+			LABEL
+				MAXSCALEDENOM 3500
+				TYPE TRUETYPE FONT arial COLOR 0 160 246 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+	LAYER
+		NAME gewaess_p
+		GROUP gewaess
+		TYPE POINT
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_bauwerkimgewaesserbereich b LEFT JOIN ax_bauwerksfunktion_bauwerkimgewaesserbereich u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POINT') AS gl using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Gew. Punkte"
+			wms_abstract "Bauwerke im Gewässerbereich (Punkte)"
+			wms_keywordlist "Rohrdurchlass,Durchlass,Pegel"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 2 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_bauwerkimgewaesserbereich b LEFT JOIN ax_bauwerksfunktion_bauwerkimgewaesserbereich u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 10
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Pu. Bauwerk im Gewässerbereich"
+			STYLE
+				SYMBOL "pkt"
+				COLOR 0 160 246
+				SIZE 9 MINSIZE 6 MAXSIZE 15 #PU
+			END
+			LABEL
+				MAXSCALEDENOM 4000
+				TYPE TRUETYPE FONT arial COLOR 0 160 246 OUTLINECOLOR 230 230 230
+				POSITION auto SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+
+	# 3: S o n s t i g e
+	LAYER
+		NAME sonst_f
+		GROUP sonst
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_sonstigesbauwerkodersonstigeeinrichtung b LEFT JOIN ax_bauwerksfunktion_sonstigesbauwerkodersonstigeeinrichtun u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND (GeometryType(b.wkb_geometry)='POLYGON' OR GeometryType(b.wkb_geometry)='MULTIPOLYGON')) AS sf using SRID=25832 using unique gml_id"
+		METADATA
+			wms_group_title "Sonstiges Bauwerk"
+			wms_group_abstract "Sonstiges Bauwerk oder Sonstige Einrichtung"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Sonst. Flächen"
+			wms_abstract "Sonstiges Bauwerk oder Sonstige Einrichtung (Flächen)"
+			wms_keywordlist "Überdachung,Carport,Brunnen,Treppe,Stützmauer,Mauer,Terrasse,Freitreppe,Rampe,Gedenkstätte,Denkmal,Denkstein,Standbild,Springbrunnen,Zierbrunnen"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 3 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_sonstigesbauwerkodersonstigeeinrichtung b LEFT JOIN ax_bauwerksfunktion_sonstigesbauwerkodersonstigeeinrichtun u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 4
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Fl. Sonstiges Bauwerk"
+			STYLE
+				COLOR 160 130 0 OPACITY 14 # Senfgelb
+			END
+			STYLE
+				OUTLINECOLOR 160 130 0
+				WIDTH 3 MINWIDTH 2 MAXWIDTH 5 #FL
+			END
+			LABEL
+				MAXSCALEDENOM 1800
+				TYPE TRUETYPE FONT arial COLOR 160 130 0 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+	LAYER
+		NAME sonst_l
+		GROUP sonst
+		TYPE LINE
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_sonstigesbauwerkodersonstigeeinrichtung b LEFT JOIN ax_bauwerksfunktion_sonstigesbauwerkodersonstigeeinrichtun u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='LINESTRING') AS sl using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Sonst. Linien"
+			wms_abstract "Sonstiges Bauwerk oder Sonstige Einrichtung (Linien)"
+			wms_keywordlist "Zaun,Stützmauer,Mauermitte,Mauerkante,Treppenunterkante,Stützmauermitte,Spundwand"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 3 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_sonstigesbauwerkodersonstigeeinrichtung b LEFT JOIN ax_bauwerksfunktion_sonstigesbauwerkodersonstigeeinrichtun u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 10
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Li. Sonstiges Bauwerk"
+			STYLE
+				COLOR 160 130 0
+				WIDTH 4 MINWIDTH 2 MAXWIDTH 7 #LI
+			END
+			LABEL
+				MAXSCALEDENOM 1800
+				TYPE TRUETYPE FONT arial COLOR 160 130 0 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+	LAYER
+		NAME sonst_p
+		GROUP sonst
+		TYPE POINT
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_sonstigesbauwerkodersonstigeeinrichtung b LEFT JOIN ax_bauwerksfunktion_sonstigesbauwerkodersonstigeeinrichtun u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POINT') AS gl using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Sonstige. Punkte"
+			wms_abstract "Sonstiges Bauwerk oder Sonstige Einrichtung (Punkte)"
+			wms_keywordlist "Gedenkstätte,Denkmal,Denkstein,Standbild,Brunnen,Meilenstein,historischer Grenzstein,Wegekreuz,Ziehbrunnen"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 3 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_sonstigesbauwerkodersonstigeeinrichtung b LEFT JOIN ax_bauwerksfunktion_sonstigesbauwerkodersonstigeeinrichtun u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 10
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Pu. Sonstiges Bauwerk"
+			STYLE
+				SYMBOL "pkt"
+				COLOR 160 130 0
+				SIZE 9 MINSIZE 6 MAXSIZE 15 #PU
+			END
+			LABEL
+				MAXSCALEDENOM 4000
+				TYPE TRUETYPE FONT arial COLOR 160 130 0 OUTLINECOLOR 230 230 230
+				POSITION auto SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+
+	# 4: Bauwerk oder Anlage für Industrie und Gewerbe
+	LAYER
+		NAME indu_f
+		GROUP indu
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_bauwerkoderanlagefuerindustrieundgewerbe b LEFT JOIN ax_bauwerksfunktion_bauwerkoderanlagefuerindustrieundgewer u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POLYGON') AS if using SRID=25832 using unique gml_id"
+		METADATA
+			wms_group_title "Ind./Gewerbe Bauwerk"
+			wms_group_abstract "Bauwerk oder Anlage für Industrie und Gewerbe"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Ind./Gewerbe Flächen"
+			wms_abstract "Bauwerk oder Anlage für Industrie und Gewerbe (Flächen)"
+			wms_keywordlist "Klärbecken,Umformer,Schornstein,Schlot,Esse,Biogasanlage,Funkmast,Windrad,Mast,Solarzellen,Laufkran, Brückenlaufkran,Portalkran,Trockendock,Schachtöffnung,Einsteigeschacht"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 4 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_bauwerkoderanlagefuerindustrieundgewerbe b LEFT JOIN ax_bauwerksfunktion_bauwerkoderanlagefuerindustrieundgewer u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 4
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Fl. Ind./Gewerbe Bauwerk"
+			STYLE
+				COLOR 252 162 2 OPACITY 14 # orange
+			END
+			STYLE
+				OUTLINECOLOR 252 162 2
+				WIDTH 3 MINWIDTH 2 MAXWIDTH 5 #FL
+			END
+			LABEL
+				MAXSCALEDENOM 3000
+				TYPE TRUETYPE FONT arial COLOR 252 162 2 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+#	LAYER # immer leer?
+#		NAME indu_l 
+#		GROUP indu
+#		TYPE LINE
+#...
+#	END
+	LAYER
+		NAME indu_p
+		GROUP indu
+		TYPE POINT
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_bauwerkoderanlagefuerindustrieundgewerbe b LEFT JOIN ax_bauwerksfunktion_bauwerkoderanlagefuerindustrieundgewer u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POINT') AS gl using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Ind./Gewerbe Punkte"
+			wms_abstract "Bauwerk oder Anlage für Industrie und Gewerbe (Punkte)"
+			wms_keywordlist "Mast,Windrad,Funkmast,Solarzellen,Schornstein,Schlot,Esse,Umformer,Laufkran,Brückenlaufkran,Stollenmundloch, Portalkran,Drehkran,Schachtöffnung,Einsteigeschacht"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 4 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_bauwerkoderanlagefuerindustrieundgewerbe b LEFT JOIN ax_bauwerksfunktion_bauwerkoderanlagefuerindustrieundgewer u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 10
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Pu. Ind./Gewerbe Bauwerk"
+			STYLE
+				SYMBOL "pkt"
+				COLOR 252 162 2
+				SIZE 9 MINSIZE 6 MAXSIZE 15 #PU
+			END
+			LABEL
+				MAXSCALEDENOM 4000
+				TYPE TRUETYPE FONT arial COLOR 252 162 2 OUTLINECOLOR 230 230 230
+				POSITION auto SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+
+	# 5: Bauwerk oder Anlage für Sport, Freizeit und Erholung
+	LAYER
+		NAME sport_f
+		GROUP sport
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_bauwerkoderanlagefuersportfreizeitunderholung b LEFT JOIN ax_bauwerksfunktion_bauwerkoderanlagefuersportfreizeitunde u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POLYGON') AS sf using SRID=25832 using unique gml_id"
+		METADATA
+			wms_group_title "Sport/Freiz. Bauwerk"
+			wms_group_abstract "Bauwerk oder Anlage für Sport, Freizeit und Erholung"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Sport/Freiz. Flächen"
+			wms_abstract "Bauwerk oder Anlage für Sport, Freizeit und Erholung (Flächen)"
+			wms_keywordlist "Spielfeld,Schwimmbecken,Rennbahn,Laufbahn,Geläuf,Zuschauertribüne nicht überdacht,Zuschauertribüne überdacht, Rasenplatz,Hartplatz,Stadion,Liegewiese,Schießanlage,Wildgehege,Gradierwerk"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 5 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_bauwerkoderanlagefuersportfreizeitunderholung b LEFT JOIN ax_bauwerksfunktion_bauwerkoderanlagefuersportfreizeitunde u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 4
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+		#	EXPRESSION "__"
+			NAME "Fl. Sport/Freiz. Bauwerk"
+			STYLE
+				COLOR 140 0 120 OPACITY 14 # magenta
+			END
+			STYLE
+				OUTLINECOLOR 140 0 120
+				WIDTH 3 MINWIDTH 2 MAXWIDTH 5 #FL
+			END
+			LABEL
+				MAXSCALEDENOM 5000
+				TYPE TRUETYPE FONT arial COLOR 140 0 120 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+#	LAYER # immer leer?
+#		NAME sport_l
+#		GROUP sport
+#		TYPE LINE
+#...
+#	END
+	LAYER
+		NAME sport_p
+		GROUP sport
+		TYPE POINT
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_bauwerkoderanlagefuersportfreizeitunderholung b LEFT JOIN ax_bauwerksfunktion_bauwerkoderanlagefuersportfreizeitunde u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POINT') AS gl using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Sport/Freiz. Punkte"
+			wms_abstract "Bauwerk oder Anlage für Sport, Freizeit und Erholung (Punkte)"
+			wms_keywordlist "Spielfeld"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 5 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_bauwerkoderanlagefuersportfreizeitunderholung b LEFT JOIN ax_bauwerksfunktion_bauwerkoderanlagefuersportfreizeitunde u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 10
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Pu. Sport/Freiz."
+			STYLE
+				SYMBOL "pkt"
+				COLOR 140 0 120
+				SIZE 9 MINSIZE 6 MAXSIZE 15 #PU
+			END
+			LABEL
+				MAXSCALEDENOM 4000
+				TYPE TRUETYPE FONT arial COLOR 140 0 120 OUTLINECOLOR 230 230 230
+				POSITION auto SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+
+	# 6: L e i t u n g
+#	LAYER
+#		NAME leitung_f
+#		GROUP leitung
+#		TYPE POLYGON
+#....
+#	END
+	LAYER
+		NAME leitung_l
+		GROUP leitung
+		TYPE LINE
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_leitung b LEFT JOIN ax_bauwerksfunktion_leitung u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='LINESTRING') AS ll using SRID=25832 using unique gml_id"
+		METADATA
+			wms_group_title "Leitung"
+			wms_group_abstract "Leitung (Bauwerke)"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Leitung Linien"
+			wms_abstract "Leitung (Linien)"
+			wms_keywordlist "Freileitung"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 6 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_leitung b LEFT JOIN ax_bauwerksfunktion_leitung u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 10
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Li. Leitung"
+			STYLE
+				COLOR 220 10 10
+				WIDTH 4 MINWIDTH 2 MAXWIDTH 7 #LI
+			END
+			LABEL
+				MAXSCALEDENOM 4000
+				TYPE TRUETYPE FONT arial COLOR 220 10 10 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+
+	# 7: T r a n s p o r t a n l a g e
+#	LAYER
+#		NAME transport_f
+#		GROUP transport
+#		TYPE POLYGON
+#...
+#	END
+	LAYER
+		NAME transport_l
+		GROUP transport
+		TYPE LINE
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, u.beschreibung, b.wkb_geometry FROM ax_transportanlage b LEFT JOIN ax_bauwerksfunktion_transportanlage u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='LINESTRING') AS tl using SRID=25832 using unique gml_id"
+		METADATA
+			wms_group_title "Transportanlage"
+			wms_group_abstract "Transportanlage (Bauwerke)"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Transportanlage Linien"
+			wms_abstract "Transportanlage (Linien)"
+			wms_keywordlist "Förderband,Bandstraße,Rohrleitung,Pipeline"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "beschreibung"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 7 AS bwtyp, b.gml_id, NULL AS name, u.beschreibung FROM ax_transportanlage b LEFT JOIN ax_bauwerksfunktion_transportanlage u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 10
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Li. Transportanlage"
+			STYLE
+				COLOR 10 180 10
+				WIDTH 4 MINWIDTH 2 MAXWIDTH 7 #LI
+			END
+			LABEL
+				MAXSCALEDENOM 3000
+				TYPE TRUETYPE FONT arial COLOR 10 180 10 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+
+	# 8: T u r m
+	LAYER
+		NAME turm_f
+		GROUP turm
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		# ax_turm.bauwerksfunktion integer[] ist Array!
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_turm b LEFT JOIN ax_bauwerksfunktion_turm u ON u.wert=ANY(b.bauwerksfunktion) WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POLYGON') AS tf using SRID=25832 using unique gml_id"
+		METADATA
+			wms_group_title "Turm"
+			wms_group_abstract "Turm (Bauwerke)"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Turm Flächen"
+			wms_abstract "Turm (Flächen)"
+			wms_keywordlist "Aussichtsturm,Kirchturm,Glockenturm"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 8 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_turm b LEFT JOIN ax_bauwerksfunktion_turm u ON u.wert=ANY(b.bauwerksfunktion)) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 4
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Fl. Turm"
+			STYLE
+				COLOR 135 76 1 OPACITY 14
+			END
+			STYLE
+				OUTLINECOLOR 135 76 1
+				WIDTH 3 MINWIDTH 2 MAXWIDTH 5 #FL
+			END
+			LABEL
+				MAXSCALEDENOM 2000
+				TYPE TRUETYPE FONT arial COLOR 135 76 1 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+#	LAYER
+#		NAME turm_l
+#		GROUP turm
+#		TYPE LINE
+#....
+#	END
+
+	# 9: Vorratsbehälter, Speicherbauwerk
+	LAYER
+		NAME vorrat_f
+		GROUP vorrat
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_vorratsbehaelterspeicherbauwerk b LEFT JOIN ax_bauwerksfunktion_vorratsbehaelterspeicherbauwerk u ON b.bauwerksfunktion=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POLYGON') AS vf using SRID=25832 using unique gml_id"
+		METADATA
+			wms_group_title "Vorrat/Speicher"
+			wms_group_abstract "Vorratsbehälter, Speicherbauwerk"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Vorrat/Speicher Flächen"
+			wms_abstract "Vorratsbehälter, Speicherbauwerk (Flächen)"
+			wms_keywordlist "Silo,Tank"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 9 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_vorratsbehaelterspeicherbauwerk b LEFT JOIN ax_bauwerksfunktion_vorratsbehaelterspeicherbauwerk u ON b.bauwerksfunktion=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 4
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+		#	EXPRESSION "__"
+			NAME "Fl. Vorrat/Speicher"
+			STYLE
+				COLOR 0 140 40 OPACITY 14
+			END
+			STYLE
+				OUTLINECOLOR 0 140 40
+				WIDTH 3 MINWIDTH 2 MAXWIDTH 5 #FL
+			END
+			LABEL
+				MAXSCALEDENOM 2000
+				TYPE TRUETYPE FONT arial COLOR 0 140 40 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+#	LAYER
+#		NAME vorrat_l
+#		GROUP vorrat
+#		TYPE LINE
+#...
+#	END
+
+	# 10: H i s t o r i s c h e s  Bauwerk oder historische Einrichtung
+	LAYER
+		NAME hist_f
+		GROUP hist
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_historischesbauwerkoderhistorischeeinrichtung b LEFT JOIN ax_archaeologischertyp_historischesbauwerkoderhistorischee u ON b.archaeologischertyp=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POLYGON') AS hf using SRID=25832 using unique gml_id"
+		METADATA
+			wms_group_title "Historisch"
+			wms_group_abstract "Historisches Bauwerk oder historische Einrichtung"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Historisch Flächen"
+			wms_abstract "Historisches Bauwerk oder historische Einrichtung (Flächen)"
+			wms_keywordlist "Historisch"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE ogr
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 10 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_historischesbauwerkoderhistorischeeinrichtung b LEFT JOIN ax_archaeologischertyp_historischesbauwerkoderhistorischee u ON b.archaeologischertyp=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 4
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Fl. Historisch"
+			STYLE
+				COLOR 80 70 40 OPACITY 14
+			END
+			STYLE
+				OUTLINECOLOR 80 70 40
+				WIDTH 3 MINWIDTH 2 MAXWIDTH 5 #FL
+			END
+			LABEL
+				MAXSCALEDENOM 2000
+				TYPE TRUETYPE FONT arial COLOR 80 70 40 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+	LAYER
+		NAME hist_p
+		GROUP hist
+		TYPE POINT
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_historischesbauwerkoderhistorischeeinrichtung b LEFT JOIN ax_archaeologischertyp_historischesbauwerkoderhistorischee u ON b.archaeologischertyp=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POINT') AS hp using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Historisch Punkt"
+			wms_abstract "Historisches Bauwerk oder historische Einrichtung (Punkt)"
+			wms_keywordlist "Historisch"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 10 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_historischesbauwerkoderhistorischeeinrichtung b LEFT JOIN ax_archaeologischertyp_historischesbauwerkoderhistorischee u ON b.archaeologischertyp=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 10
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Pu. Historisch"
+			STYLE
+				SYMBOL "pkt"
+				COLOR 80 70 40
+				SIZE 9 MINSIZE 6 MAXSIZE 15 #PU
+			END
+			LABEL
+				MAXSCALEDENOM 4000
+				TYPE TRUETYPE FONT arial COLOR 80 70 40 OUTLINECOLOR 230 230 230
+				POSITION auto SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+
+	# 11: H e i l q u e l l e ,  G a s q u e l l e
+	LAYER
+		NAME heil_p
+		GROUP heil
+		TYPE POINT
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, coalesce(b.name, u.beschreibung) AS label, b.wkb_geometry FROM ax_heilquellegasquelle b LEFT JOIN ax_art_heilquellegasquelle u ON b.art=u.wert  WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POINT') AS hp using SRID=25832 using unique gml_id"
+		METADATA
+			wms_group_title "Heil-, Gasquelle"
+			wms_group_abstract "Heilquelle, Gasquelle"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "Heil-, Gasquelle Punkt"
+			wms_abstract "Heilquelle, Gasquelle (Punkt)"
+			wms_keywordlist "Quelle,Heilquelle,Gasquelle"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "label"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE ogr
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 11 AS bwtyp, b.gml_id, b.name, u.beschreibung FROM ax_heilquellegasquelle b LEFT JOIN ax_art_heilquellegasquelle u ON b.art=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 10
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Pu. H/G Quelle"
+			STYLE
+				SYMBOL "pkt"
+				COLOR 190 170 10
+				SIZE 9 MINSIZE 6 MAXSIZE 15 #PU
+			END
+			LABEL
+				MAXSCALEDENOM 4000
+				TYPE TRUETYPE FONT arial COLOR 190 170 10 OUTLINECOLOR 230 230 230
+				POSITION auto SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+
+	# 12: Einrichtung in öffentlichen Bereichen
+	LAYER
+		NAME oeff_f
+		GROUP oeff
+		TYPE POLYGON
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, u.beschreibung, b.wkb_geometry FROM ax_einrichtunginoeffentlichenbereichen b LEFT JOIN ax_art_einrichtunginoeffentlichenbereichen u ON b.art=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POLYGON') AS of using SRID=25832 using unique gml_id"
+		METADATA
+			wms_group_title "öffendl. Einrichtung"
+			wms_group_abstract "Einrichtung in öffentlichen Bereichen"
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "öffendl. Einrichtung Fläche"
+			wms_abstract "Einrichtung in öffentlichen Bereichen (Flächen)"
+			wms_keywordlist "öffendlich,Einrichtung"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "beschreibung"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE ogr
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 12 AS bwtyp, b.gml_id, NULL AS name, u.beschreibung FROM ax_einrichtunginoeffentlichenbereichen b LEFT JOIN ax_art_einrichtunginoeffentlichenbereichen u ON b.art=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 4
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Fl. öffentlich"
+			STYLE
+				COLOR 200 10 60 OPACITY 14
+			END
+			STYLE
+				OUTLINECOLOR 200 10 60
+				WIDTH 3 MINWIDTH 2 MAXWIDTH 5 #FL
+			END
+			LABEL
+				MAXSCALEDENOM 2000
+				TYPE TRUETYPE FONT arial COLOR 200 10 60 OUTLINECOLOR 230 230 230
+				POSITION cc SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+	LAYER
+		NAME oeff_p
+		GROUP oeff
+		TYPE POINT
+		EXTENT ...
+		PROJECTION "init=epsg:25832" END
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from (SELECT b.gml_id, u.beschreibung, b.wkb_geometry FROM ax_einrichtunginoeffentlichenbereichen b LEFT JOIN ax_art_einrichtunginoeffentlichenbereichen u ON b.art=u.wert WHERE b.endet IS NULL AND GeometryType(b.wkb_geometry)='POINT') AS op using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "öffendl. Einrichtung Punkt"
+			wms_abstract "Einrichtung in öffentlichen Bereichen (Punkt)"
+			wms_keywordlist "öffendlich,Einrichtung"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 800
+		LABELITEM "beschreibung"
+		JOIN
+			NAME "BW"
+			CONNECTIONTYPE postgresql
+			CONNECTION 'host=[IP-DB-Server] dbname=alkis0*gkz* user=ms7 port=5432'
+			TABLE "(SELECT 12 AS bwtyp, b.gml_id, NULL AS name, u.beschreibung FROM ax_einrichtunginoeffentlichenbereichen b LEFT JOIN ax_art_einrichtunginoeffentlichenbereichen u ON b.art=u.wert) as query" 
+			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
+  		END
+		TOLERANCEUNITS pixels TOLERANCE 10
+		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
+		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
+		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		CLASS
+			NAME "Pu. öffentlich"
+			STYLE
+				SYMBOL "pkt"
+				COLOR 200 10 60
+				SIZE 9 MINSIZE 6 MAXSIZE 15 #PU
+			END
+			LABEL
+				MAXSCALEDENOM 4000
+				TYPE TRUETYPE FONT arial COLOR 200 10 60 OUTLINECOLOR 230 230 230
+				POSITION auto SIZE 10 MINSIZE 8 MAXSIZE 13
+			END
+		END
+	END
+
+	# 13: Besonderer Bauwerkspunkt
+	# Tab: ax_besondererbauwerkspunkt, rgb 250 40 10
+END

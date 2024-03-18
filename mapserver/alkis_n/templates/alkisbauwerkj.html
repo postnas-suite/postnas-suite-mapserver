@@ -1,0 +1,30 @@
+<!-- MapServer Template -->
+<!-- Variante für JOIN mit Prefix BW -->
+<script type="text/javascript">
+	var mapfile = "[map]";
+	var strt = mapfile.length - 7;
+	var gkz = mapfile.substr(strt, 3);
+	var url="https://mein.server.de/alkisn/alkisbauwerk.php?gkz=" + gkz + "&btyp=[BW_bwtyp]&gmlid=[BW_gml_id]";
+</script>
+<table>
+	<tr>
+		<td class='li'>Typ von Bauwerk</td>
+		<script>bauwerktyp([BW_bwtyp])</script>
+	</tr>
+	<tr>	
+		<td class='li'>Name</td>
+		<td>[BW_name]</td>
+	</tr>
+	<tr>	
+		<td class='li'>Beschreibung</td>
+		<td>[BW_beschreibung]</td>
+	</tr>
+	<tr>
+		<td class='li'>Mehr ..</td>
+		<td>
+			<script>
+				document.writeln("<a href='javascript:imFenster(\"" + url + "\")'>Auskunft</a>");
+			</script>
+		</td>
+	</tr>
+</table>

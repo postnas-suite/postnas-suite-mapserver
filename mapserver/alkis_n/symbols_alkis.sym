@@ -1,0 +1,18 @@
+SYMBOLSET
+# Symboldatei fuer Mapdatei alkis_punktnummernuebersicht.map
+
+	SYMBOL
+		NAME "point"
+		TYPE ellipse
+		FILLED true
+		POINTS 1 1 END
+	END
+
+	SYMBOL
+		NAME "circle"
+		TYPE ellipse
+		FILLED false
+		POINTS 1 1 END
+	END
+
+END

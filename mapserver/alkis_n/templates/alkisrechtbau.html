@@ -1,0 +1,8 @@
+<!-- MapServer Template -->
+<script type="text/javascript" language="JavaScript">
+	var mapfile = "[map]";
+	var strt = mapfile.length - 7;
+	var gkz = mapfile.substr(strt, 3);
+	document.writeln("<iframe class='inlay' name='baurechtinlay' src='http://mapserver.krz.de/alkisn/alkisinlaybaurecht.php?gkz=" + gkz + "&amp;gmlid=[gml_id]'>");
+	document.writeln("Weitere Informationen zum ALKIS Bau-, Raum- oder Bodenordnungsrecht [gml_id]</iframe'>");
+ </script>

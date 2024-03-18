@@ -1,0 +1,26 @@
+<!-- MapServer Template -->
+<!-- Variante ohne JOIN ohne Prefix -->
+<script type="text/javascript">
+	var mapfile = "[map]";
+	var strt = mapfile.length - 7;
+	var gkz = mapfile.substr(strt, 3);
+	var url="https://mein.server.de/alkisn/alkisbauwerk.php?gkz=" + gkz + "&btyp=[bwtyp]&gmlid=[gml_id]";
+</script>
+<table>
+	<tr>
+		<td class='li'>Typ von Bauwerk</td>
+		<script>bauwerktyp([bwtyp])</script>
+	</tr>
+	<tr>	
+		<td class='li'>Bauwerksfunktion</td>
+		<td>[beschreibung]</td>
+	</tr>
+	<tr>
+		<td class='li'>Mehr ..</td>
+		<td>
+			<script>
+				document.writeln("<a href='javascript:imFenster(\"" + url + "\")'>Auskunft</a>");
+			</script>
+		</td>
+	</tr>
+</table>

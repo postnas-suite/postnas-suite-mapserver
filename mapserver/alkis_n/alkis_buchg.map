@@ -1,0 +1,221 @@
+MAP
+# ALKIS: Flurstücke mit mehreren (2 bis 4) Buchungs-Stellen mit Rechte-Kaskade.  
+# Diese Sonderfälle für die Entwicklung der Buchauskunft suchen und anzeigen.
+# Die benötigten Views werden definiert in /postcreate.d/7_views_buchungsketten.sql
+# Mit Maptrimmer eine ausführbare (schlanke) Version diese Mapfiles für jedes GKZ (Mandant) erzeugen.
+# Erweiterte Kommentare siehe Version auf Testserver.
+# Stand
+#  2017-12-08 Entwurf auf OWS-Server übertragen
+#  2017-12-08 Neu: 4/2303
+#  2019-03-05 EPSG:54004 entfernt
+#  2019-03-08 GKZ in Keyword
+	NAME "alkis_buchg_*gkz*"
+	EXTENT ...
+	PROJECTION "init=epsg:25832" END
+	STATUS ON
+	MAXSIZE 8400
+	FONTSET "/opt/gdi/fonts/arial.fnt"
+	UNITS METERS
+	SYMBOL
+		NAME "hatchsym"
+		TYPE hatch
+	END
+	WEB
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		METADATA
+			wms_title "ALKIS Buchungen"
+			wms_abstract "Flurstücke mit Buchungen an denen mehrere Buchungsstellen und Grundbücher kaskadierend berechtigt sind. Es werden 2 bis 4 Stufen der 'Rechte an' dargestellt."
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_bbox_extended "true"
+			wms_encoding "UTF-8"
+			wms_onlineresource "http://ows.krz.de/cgi-bin/mapserv7?map=/opt/gdi/alkisn/alkis_buchg_*gkz*.map"
+			wms_feature_info_mime_type "text/html"
+			wms_keywordlist "GKZ*gkz*,ALKIS,Flurstück,Buchungsstellen,Buchungsarten"
+			wms_fees "none"
+			wms_accessconstraints "für den Dienstgebrauch"
+			wms_enable_request "*"
+			include "meta600.map"
+		END
+	END
+	LEGEND
+		STATUS ON
+		KEYSIZE 32 16
+		KEYSPACING 5 5
+		TRANSPARENT ON
+		LABEL
+			TYPE TRUETYPE
+			FONT 'arial'
+			SIZE 9
+			COLOR 1 1 1
+		END
+	END
+
+	LAYER
+		NAME "buchg2"
+		TYPE POLYGON
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=10.0.xxx.xxx dbname=alkis0*gkz* user=ms6 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from buchungsrechte_2wms using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "2 Buchungsstellen"
+			wms_abstract "Flurstücke mit 2 gegenseitig berechtigten Buchungsstellen, z.B. 'Erbbaurecht' an 'Grundstück'. Dargestellt wir die Buchungsart der berechtigten (herrschenden) Buchungsstelle."
+			wms_keywordlist "Wohnungs-/Teileigentum, Miteigentum Par. 3 Abs. 4 GBO, Erbbaurecht, Aufgeteiltes Erbbaurecht WEG"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 750
+		CLASSITEM "buchungsart"
+		CLASS
+			EXPRESSION "1301"
+			NAME "Wohnungs-/Teileigentum"
+			STYLE
+				OFFSET -4 -99 # innen
+				OUTLINECOLOR 20 0 250 OPACITY 55 # Blau
+				WIDTH 6 MINWIDTH 4 MAXWIDTH 10
+				PATTERN 4 5 END LINECAP butt
+			END
+		END
+		CLASS
+			EXPRESSION "2101"
+			NAME "Erbbaurecht"
+			STYLE
+				OFFSET -4 -99
+				OUTLINECOLOR 20 250 0 OPACITY 55 # Grün
+				WIDTH 6 MINWIDTH 4 MAXWIDTH 10
+				PATTERN 4 5 END LINECAP butt
+			END
+		END
+		CLASS
+			EXPRESSION "2201"
+			NAME "Aufgeteiltes Erbbaurecht WEG"
+			STYLE
+				OFFSET -4 -99
+				OUTLINECOLOR 0 250 250 OPACITY 55 # Türkis
+				WIDTH 6 MINWIDTH 4 MAXWIDTH 10
+				PATTERN 4 5 END LINECAP butt
+			END
+		END
+		CLASS
+			EXPRESSION "1302"
+			NAME "Miteigentum Par. 3 Abs. 4 GBO"
+			STYLE
+				OFFSET -4 -99
+				OUTLINECOLOR 250 160 0 OPACITY 55 # Orange
+				WIDTH 6 MINWIDTH 4 MAXWIDTH 10
+				PATTERN 4 5 END LINECAP butt
+			END
+		END
+		CLASS # sonstige/Rest
+			STYLE
+				OFFSET -4 -99 # nach innen?
+				OUTLINECOLOR 250 0 20 OPACITY 40 # Rot
+				WIDTH 6 MINWIDTH 4 MAXWIDTH 10
+				PATTERN 4 5 END # feiner
+			END
+		END
+	END
+
+	LAYER
+		NAME "buchg3"
+		TYPE POLYGON
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=10.0.xxx.xxx dbname=alkis0*gkz* user=ms6 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from buchungsrechte_3wms using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "3 Buchungsstellen"
+			wms_abstract "Flurstücke mit 3 gegenseitig berechtigten Buchungsstellen, z.B. 'Untererbbaurecht' an 'Erbbbaurecht' an 'Grundstück'. Dargestellt wir die Buchungsart der berechtigten (herrschenden) Buchungsstelle auf der 3. Ebene."
+			wms_keywordlist "Untererbbaurecht,Aufgeteiltes Untererbbaurecht WEG,Aufgeteiltes Recht Par. 3 Abs. 4 GBO,Wohnungs-/Teilerbbaurecht"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		CLASSITEM "buchungsart"
+
+		CLASS
+			EXPRESSION "2202"
+			NAME "Aufgeteiltes Untererbbaurecht WEG"
+			STYLE
+				COLOR 20 0 250 OPACITY 25 # Blau
+			END
+		END
+		CLASS
+			EXPRESSION "2102"
+			NAME "Untererbbaurecht"
+			STYLE
+				COLOR 20 250 0 OPACITY 25 # Grün
+			END
+		END
+		CLASS
+			EXPRESSION "2301"
+			NAME "Wohnungs-/Teilerbbaurecht"
+			STYLE
+				COLOR 0 250 250 OPACITY 25 # Türkis
+			END
+		END
+		CLASS
+			EXPRESSION "2203"
+			NAME "Aufgeteiltes Recht Par. 3 Abs. 4 GBO"
+			STYLE
+				COLOR 250 160 0 OPACITY 25 # Orange
+			END
+		END
+		CLASS # sonstige/Rest
+			STYLE
+				COLOR 250 0 20 OPACITY 20 # Rot
+			END
+		END
+	END
+
+	LAYER
+		NAME "buchg4"
+		TYPE POLYGON
+		CONNECTIONTYPE POSTGIS
+		CONNECTION "host=10.0.xxx.xxx dbname=alkis0*gkz* user=ms6 port=5432"
+		PROCESSING "CLOSE_CONNECTION=DEFER"
+		DATA "wkb_geometry from buchungsrechte_4wms using SRID=25832 using unique gml_id"
+		METADATA
+			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
+			wms_title "4 Buchungsstellen"
+			wms_abstract "Flurstücke mit 4 gegenseitig berechtigten Buchungsstellen, z.B. 'Wohnungs-/Teiluntererbbaurecht'. Dargestellt wir die Buchungsart der berechtigten (herrschenden) Buchungsstelle auf der 4. Ebene."
+			wms_keywordlist "Wohnungs-/Teiluntererbbaurecht"
+		END
+		MINSCALEDENOM 50
+		MAXSCALEDENOM 15000
+		SYMBOLSCALEDENOM 750
+		CLASSITEM "buchungsart"
+		CLASS
+			EXPRESSION "2302"
+			NAME "Wohnungs-/Teiluntererbbaurecht"
+			STYLE
+				SYMBOL hatchsym ANGLE 45
+				COLOR 20 250 0 OPACITY 70 # Grün
+				SIZE 6 MINSIZE 3 MAXSIZE 12
+				WIDTH 2 MINWIDTH 1 MAXWIDTH 2
+				
+			END
+		END
+		CLASS
+			EXPRESSION "2303"
+			NAME "Erbbaurechtsanteil Par. 3 Abs. 4 GBO"
+			STYLE
+				SYMBOL hatchsym ANGLE 45
+				COLOR 250 160 0 OPACITY 70 # Orange
+				SIZE 6 MINSIZE 3 MAXSIZE 12
+				WIDTH 2 MINWIDTH 1 MAXWIDTH 2
+				
+			END
+		END
+		CLASS
+			STYLE
+				SYMBOL hatchsym ANGLE 45
+				COLOR 250 0 20 OPACITY 50 # Rot
+				SIZE 8 MINSIZE 4 MAXSIZE 16
+				WIDTH 2 MINWIDTH 1 MAXWIDTH 3
+			END
+		END
+	END
+END
