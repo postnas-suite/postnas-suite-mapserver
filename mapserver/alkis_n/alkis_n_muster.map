@@ -32,6 +32,10 @@ MAP
 #  2019-08-13 User ms6 -> ms7
 #  2020-01-28 F.J.: Name in CLASS auskommentiert im Layer: Linien (Verkehr), Punkte (Verkehr), Linien (Gebäude). Darstellung in Legende ist sonst fehlerhaft.
 #
+#  2024-04-23 T.W.: symbols in einen eigenen Ordner gelegt
+#  2024-04-23 T.W.: fonts überarbeitet
+#  2024-04-23 T.W.: QGIS Plugin Symbole aus: https://github.com/norBIT/alkisplugin/tree/master
+#
 # ToDo:
 # - LAYER "bgn" = Gebäude / Nebengebäude lfd. Nr. - zeigt nichts an!
 # - Vergebene Hausnummern, zu denen noch kein Gebäude-Objekt existiert anzeigen. In Klammern am Rand des Flurstücks.
@@ -44,7 +48,9 @@ MAP
 ## SVG:
 # Die SVG-Symbole sind aus dem norBIT-ALKIS-Plugin zu entnehmen:
 # Quelle: C:\Users\[ich]\.qgis2\python\plugins\alkisplugin\svg\
-# Der Inhalt dieses Ordners ist komplett zum WMS-Server zu exportieren: /opt/gdi/alkisn/svg/ 
+# ODER
+# https://github.com/norBIT/alkisplugin/tree/master
+# Der Inhalt des Ordners ggf. zum WMS-Server zu exportieren: z.B /.../mapserver/alkis_n/symbols/ 
 #
 ## MapProxy:
 #  Layer für Fläche: LAYERS=fh,fb,fe,fw,fs,fi,fv,fg
@@ -177,8 +183,8 @@ MAP
 		TYPE ELLIPSE FILLED TRUE
 		POINTS 1 1 1 1 END
 	END
-	SYMBOLSET "symbols.sym" # ausgelagert, ursprünglich alle hier inline generiert
-	FONTSET "/opt/gdi/alkisn/fonts/fonts.txt"
+	SYMBOLSET "symbols/symbols.sym"
+	FONTSET "fonts/fonts.txt"
 	UNITS METERS
 	WEB
 		METADATA
@@ -187,7 +193,7 @@ MAP
 			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
 			wms_bbox_extended "true"
 			wms_encoding "UTF-8"
-			wms_onlineresource "http://ows.krz.de/cgi-bin/mapserv7?map=/opt/gdi/alkisn/alkis*gkz*.map"
+			wms_onlineresource "http://**hostname**/cgi-bin/mapserv7?map=/.../mapserver/alkisn/alkis_n_muster.map"
 			# Die Position von "GKZ" im Mapfile-Namen muss 3stellig sein, am Ende vor ".map".
 			# GKZ wird vom Template über die Variable [map] ausgelesen um die richtige DB der Auskunft zu finden.
 			wms_feature_info_mime_type "text/html"
@@ -202,8 +208,7 @@ MAP
 
 			# praktisch: Bei Feature-Info auf Layer "gff" (Grenzen Flurstücke) antwortet der WMS
 			#  dass der Layer nicht erlaubt ist. Also alles pauschal erlauben.
-			wms_enable_request "*"
-			include "meta600.map" # Kontakt krz
+			wms_enable_request "*"			
 		END
 	END
 
@@ -227,7 +232,7 @@ MAP
 
 	LAYER NAME "fh" # Friedhöfe / Flächen
 		CLASSITEM "signaturnummer"
-		CONNECTION "dbname='alkis0*gkz*' host=10.0.100.75 port=5432 user='ms7'"
+		CONNECTION "dbname='alkis0*gkz*' host=10.0.100.75 port=5432 user='ms7'"		
 		CONNECTIONTYPE POSTGIS
 		DATA "geom FROM (SELECT ogc_fid,gml_id,polygon AS geom,sn_flaeche AS signaturnummer FROM po_polygons WHERE thema='Friedhöfe' AND modell && ARRAY['DLKM','DKKM1000']::varchar[] AND NOT sn_flaeche IS NULL) AS foo USING UNIQUE ogc_fid USING SRID=25832"
 		EXTENT ..
@@ -271,7 +276,7 @@ MAP
 		STATUS OFF
 		SYMBOLSCALEDENOM 1000
 		TYPE POLYGON
-		UNITS METERS
+		SIZEUNITS METERS
 		CLASS
 			NAME "Wohnbaufläche"
 			EXPRESSION "1401"
@@ -4628,10 +4633,11 @@ MAP
 		TYPE POLYGON
 		UNITS METERS
 
-		TOLERANCEUNITS pixels TOLERANCE 1
-		HEADER   "/opt/gdi/alkisn/templates/alkisrechtbauh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisrechtbau.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		TOLERANCEUNITS pixels 
+		TOLERANCE 1
+		HEADER   "templates/alkisrechtbauh.html"
+		TEMPLATE "templates/alkisrechtbau.html"
+		FOOTER   "templates/footer.html"
 
 		CLASS
 		#-	NAME "Bau-, Raum-, Bodenordnungsrecht"
@@ -5091,10 +5097,11 @@ MAP
 		SIZEUNITS METERS
 		STATUS OFF
 
-		HEADER   "/opt/gdi/alkisn/templates/alkisauskh.html" 
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisausk.html" # gkz wird aus Mapfile-Name entnommen!
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
-		TOLERANCEUNITS pixels TOLERANCE 1
+		HEADER   "templates/alkisauskh.html" 
+		TEMPLATE "templates/alkisausk.html" # gkz wird aus Mapfile-Name entnommen!
+		FOOTER   "templates/footer.html"
+		TOLERANCEUNITS pixels 
+		TOLERANCE 1
 
 		TYPE POLYGON
 		UNITS METERS
