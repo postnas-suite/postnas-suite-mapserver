@@ -35,7 +35,7 @@ MAP
 			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
 			wms_bbox_extended "true"
 			wms_encoding "UTF-8"
-			wms_onlineresource "https://mein.ows-server.de/cgi-bin/mapserv7?map=/opt/gdi/alkisn/alkis_bauwerke_*gkz*.map"
+			wms_onlineresource "http://**hostname**/cgi-bin/mapserv7?map=/.../mapserver/alkisn/alkis_bauwerke.map"
 			wms_feature_info_mime_type "text/html"
 			wms_keywordlist "GKZ*gkz*,ALKIS,Bauwerk,Brücke,Durchlass,Carport,Turm"
 			wms_fees "none"
@@ -88,9 +88,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 4
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "/templates/alkisbauwerkh.html"
+		TEMPLATE "/templates/alkisbauwerkj.html"
+		FOOTER   "/templates/footer.html"
 		CLASS
 			NAME "Fl. Bauwerk im Verkehrsbereich"
 			STYLE
