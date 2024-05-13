@@ -11,6 +11,10 @@ MAP
 #             JOIN für Feature-Info in allen Layern. EXTENT auch in Layern.
 #             Für die Kartenanzeige (label) wird mit "coalesce()" vorrangig der Name angezeigt, ersatzweise der Bauwerkstyp.
 #             Für die Feature-Info werden beide Werte an das Template geliefert.
+#
+#  2024-05-08 T.W.: Pfad zu symbols 
+#  2024-05-08 T.W.: fonts überarbeitet
+#  2024-05-08 T.W.: Pfad zu den templates relativ
 
 # ToDo: keywords vervollständigen
 
@@ -19,7 +23,7 @@ MAP
 	PROJECTION "init=epsg:25832" END
 	STATUS ON
 	MAXSIZE 8400
-	FONTSET "/opt/gdi/fonts/arial.fnt"
+	FONTSET "fonts/fonts_alkis.fnt"
 	UNITS METERS
 	SYMBOL
 		NAME "pkt"
@@ -40,8 +44,7 @@ MAP
 			wms_keywordlist "GKZ*gkz*,ALKIS,Bauwerk,Brücke,Durchlass,Carport,Turm"
 			wms_fees "none"
 			wms_accessconstraints "für den Dienstgebrauch"
-			wms_enable_request "*"
-			include "meta600.map"
+			wms_enable_request "*"			
 		END
 	END
 	LEGEND
@@ -88,9 +91,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 4
-		HEADER   "/templates/alkisbauwerkh.html"
-		TEMPLATE "/templates/alkisbauwerkj.html"
-		FOOTER   "/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Fl. Bauwerk im Verkehrsbereich"
 			STYLE
@@ -137,9 +140,9 @@ MAP
   		END
 
 		TOLERANCEUNITS pixels TOLERANCE 10
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Li. Bauwerk im Verkehrsbereich"
 			STYLE
@@ -185,9 +188,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 4
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 		#	EXPRESSION "__"
 			NAME "Fl. Bauwerk im Gewässerbereich"
@@ -233,9 +236,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 10
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Li. Bauwerk im Gewässerbereich"
 			STYLE
@@ -277,9 +280,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 10
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Pu. Bauwerk im Gewässerbereich"
 			STYLE
@@ -326,9 +329,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 4
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Fl. Sonstiges Bauwerk"
 			STYLE
@@ -373,9 +376,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 10
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Li. Sonstiges Bauwerk"
 			STYLE
@@ -417,9 +420,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 10
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Pu. Sonstiges Bauwerk"
 			STYLE
@@ -466,9 +469,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 4
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Fl. Ind./Gewerbe Bauwerk"
 			STYLE
@@ -519,9 +522,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 10
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Pu. Ind./Gewerbe Bauwerk"
 			STYLE
@@ -568,9 +571,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 4
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 		#	EXPRESSION "__"
 			NAME "Fl. Sport/Freiz. Bauwerk"
@@ -622,9 +625,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 10
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Pu. Sport/Freiz."
 			STYLE
@@ -677,9 +680,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 10
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Li. Leitung"
 			STYLE
@@ -730,10 +733,9 @@ MAP
 			TABLE "(SELECT 7 AS bwtyp, b.gml_id, NULL AS name, u.beschreibung FROM ax_transportanlage b LEFT JOIN ax_bauwerksfunktion_transportanlage u ON b.bauwerksfunktion=u.wert) as query" 
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
-		TOLERANCEUNITS pixels TOLERANCE 10
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Li. Transportanlage"
 			STYLE
@@ -780,9 +782,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 4
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Fl. Turm"
 			STYLE
@@ -837,9 +839,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 4
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 		#	EXPRESSION "__"
 			NAME "Fl. Vorrat/Speicher"
@@ -895,9 +897,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 4
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Fl. Historisch"
 			STYLE
@@ -942,9 +944,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 10
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Pu. Historisch"
 			STYLE
@@ -991,9 +993,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 10
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Pu. H/G Quelle"
 			STYLE
@@ -1040,9 +1042,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 4
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Fl. öffentlich"
 			STYLE
@@ -1087,9 +1089,9 @@ MAP
 			FROM "gml_id" TO "gml_id" TYPE ONE-TO-ONE
   		END
 		TOLERANCEUNITS pixels TOLERANCE 10
-		HEADER   "/opt/gdi/alkisn/templates/alkisbauwerkh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisbauwerkj.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisbauwerkh.html"
+		TEMPLATE "templates/alkisbauwerkj.html"
+		FOOTER   "templates/footer.html"
 		CLASS
 			NAME "Pu. öffentlich"
 			STYLE

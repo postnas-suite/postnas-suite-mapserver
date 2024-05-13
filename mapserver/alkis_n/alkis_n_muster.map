@@ -35,6 +35,7 @@ MAP
 #  2024-04-23 T.W.: symbols in einen eigenen Ordner gelegt
 #  2024-04-23 T.W.: fonts überarbeitet
 #  2024-04-23 T.W.: QGIS Plugin Symbole aus: https://github.com/norBIT/alkisplugin/tree/master
+#  2024-04-23 T.W.: Pfad der templates relativ
 #
 # ToDo:
 # - LAYER "bgn" = Gebäude / Nebengebäude lfd. Nr. - zeigt nichts an!
