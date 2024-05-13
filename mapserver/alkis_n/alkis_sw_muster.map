@@ -1,6 +1,6 @@
 MAP
 # ALKIS generiert aus norBIT-QGIS-Plugin, dann manuell nach-bearbeitet für mapserver 7.4
-# http://10.0.100.54/cgi-bin/mapserv7?map=/opt/gdi/alkisn/alkissw*gkz*.map&REQUEST=GetCapabilities&SERVICE=WMS&VERSION=1.1.1 
+# http://host/cgi-bin/mapserv?map=/.../alkisn/alkissw*gkz*.map&REQUEST=GetCapabilities&SERVICE=WMS&VERSION=1.3.0 
 
 # Stand:
 #  2016-05-19 generiert, angepasst und optimiert
@@ -22,12 +22,18 @@ MAP
 #  2019-08-13 User ms6 -> ms7
 #  2020-01-28 F.J.: Name in CLASS auskommentiert in mehreren Layern. Darstellung in Legende ist sonst fehlerhaft.
 #  2020-06-10 F.J.: wms_enable_request '* !GetMetadata', Extent in alle Layer (vom Maptrimmer nicht unterstützt!)
+
+#
+#  2024-04-23 T.W.: symbols in einen eigenen Ordner gelegt
+#  2024-04-23 T.W.: fonts überarbeitet
+#  2024-04-23 T.W.: Pfad der templates relativ
 #
 ### Erlaeuterungen:
 ## SVG:
 # Die SVG-Symbole sind aus dem norBIT-ALKIS-Plugin zu entnehmen:
 # Quelle: C:\Users\[ich]\.qgis2\python\plugins\alkisplugin\svg\
-# Der Inhalt dieses Ordners ist komplett zum WMS-Server zu exportieren: /opt/gdi/alkisn/svg/ 
+# https://github.com/norBIT/alkisplugin/tree/master
+#
 #
 ## Layername:
 # Der aus QGIS generierte Layername ("l" + lfd.Nr) ist unterschiedlich je Mandant, 
@@ -158,13 +164,13 @@ MAP
 
 	NAME "alkissw"
 	STATUS ON
-   	#CONFIG "MS_ERRORFILE" "/opt/gdi/log/umn.log"
-	EXTENT ...
+   	#CONFIG "MS_ERRORFILE" "log/umn.log"
+	EXTENT ..
 	PROJECTION "init=epsg:25832" END
 	MAXSIZE 8400 # reicht fuer 288 dpi auf DIN-A2
 	DEFRESOLUTION 72
-	SYMBOLSET "symbolssw.sym" # ausgelagert, ursprünglich hier inline generiert
-	FONTSET "/opt/gdi/alkisn/fonts/fonts.txt"
+	SYMBOLSET "symbols/symbolssw.sym" # ausgelagert, ursprünglich hier inline generiert
+	FONTSET "fonts/fonts.txt"
 	UNITS METERS
 	WEB
 		METADATA
@@ -173,7 +179,7 @@ MAP
 			wms_srs "EPSG:25832 EPSG:31467 EPSG:4326 EPSG:3034 EPSG:3857"
 			wms_bbox_extended "true"
 			wms_encoding "UTF-8"
-			wms_onlineresource "http://ows.krz.de/cgi-bin/mapserv7?map=/opt/gdi/alkisn/alkissw*gkz*.map"
+			wms_onlineresource "http://host/cgi-bin/mapserv?map=/.../alkisn/alkissw*gkz*.map"
 			# Die Position von "GKZ" im Mapfile-Namen muss 3stellig sein, am Ende vor ".map".
 			# GKZ wird vom Template über den [map] ausgelesen um die richtige DB der Auskunft zu finden.
 			wms_feature_info_mime_type "text/html"
@@ -182,7 +188,6 @@ MAP
 			wms_fees "none"
 			wms_accessconstraints "für den Dienstgebrauch"
 			wms_enable_request '* !GetMetadata'
-			include "meta600.map" # Kontakt krz
 		END
 	END
 
@@ -3949,9 +3954,9 @@ MAP
 		UNITS METERS
 
 		TOLERANCEUNITS pixels TOLERANCE 1
-		HEADER   "/opt/gdi/alkisn/templates/alkisrechtbauh.html"
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisrechtbau.html"
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisrechtbauh.html"
+		TEMPLATE "templates/alkisrechtbau.html"
+		FOOTER   "templates/footer.html"
 
 		CLASS
 		#- 	NAME "Bau-, Raum-, Bodenordnungsrecht"
@@ -4540,9 +4545,9 @@ MAP
 		SIZEUNITS METERS
 		STATUS OFF
 
-		HEADER   "/opt/gdi/alkisn/templates/alkisauskh.html" 
-		TEMPLATE "/opt/gdi/alkisn/templates/alkisausk.html" # gkz aus Mapfile-Name!
-		FOOTER   "/opt/gdi/alkisn/templates/footer.html"
+		HEADER   "templates/alkisauskh.html" 
+		TEMPLATE "templates/alkisausk.html" # gkz aus Mapfile-Name!
+		FOOTER   "templates/footer.html"
 		TOLERANCEUNITS pixels TOLERANCE 1
 
 		TYPE POLYGON
