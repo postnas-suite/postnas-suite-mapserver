@@ -1,6 +1,7 @@
 SYMBOLSET
 # Symbole fuer ALKIS-Mapfile Schwarz/Weiss generiert aus aus Norbit-QGIS-Plugin
 # Version 2017-11-21 Abgleich, Sortierung, Komprimierung
+
 SYMBOL NAME "0" TYPE ELLIPSE FILLED TRUE POINTS 1 1 1 1 END END
 SYMBOL NAME "norGIS_alkis3010_2" TYPE SVG IMAGE "alkis3010_2.svg" END
 SYMBOL NAME "norGIS_alkis3011_2" TYPE SVG IMAGE "alkis3011_2.svg" END
